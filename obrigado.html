@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Abrindo o WhatsApp · Constru Fácil Itu</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>
+@font-face{font-family:'Poppins';src:url('assets/fonts/poppins-300.woff2') format('woff2');font-weight:300;font-display:swap}
+@font-face{font-family:'Poppins';src:url('assets/fonts/poppins-400.woff2') format('woff2');font-weight:400;font-display:swap}
+*{margin:0;box-sizing:border-box}
+body{font-family:'Poppins',Arial,sans-serif;background:#FAF8F5;color:#1F1D1B;min-height:100svh;display:grid;place-items:center;text-align:center;padding:2rem}
+.caixa{max-width:30rem}
+.casa{width:76px;margin:0 auto 1.8rem}
+h1{font-weight:300;font-size:1.9rem;line-height:1.15;letter-spacing:-.02em}
+h1 span{color:#BB2C35}
+p{margin-top:.8rem;color:#57514B;font-size:.98rem;line-height:1.65}
+.giro{width:30px;height:30px;margin:1.8rem auto 0;border:2px solid #E5DED4;border-top-color:#0B7A3B;border-radius:50%;animation:g 1s linear infinite}
+@keyframes g{to{transform:rotate(360deg)}}
+.manual{margin-top:1.6rem;display:none}
+.manual a{display:inline-flex;align-items:center;min-height:50px;padding:.8rem 1.6rem;border-radius:999px;background:#0B7A3B;color:#fff;text-decoration:none;font-weight:400}
+.voltar{display:block;margin-top:1.1rem;font-size:.88rem;color:#57514B}
+@media (prefers-reduced-motion:reduce){.giro{animation:none}}
+</style>
+</head>
+<body>
+<div class="caixa">
+  <svg class="casa" viewBox="0 0 100 64" aria-hidden="true"><path fill="#BB2C35" d="M0 46.6L50 0L100 46.6L92.96 46.6L50 6.56L7.04 46.6Z"/><g fill="#BB2C35"><rect x="39.5" y="34" width="9.5" height="9"/><rect x="51" y="34" width="9.5" height="9"/><rect x="39.5" y="45" width="9.5" height="9"/><rect x="51" y="45" width="9.5" height="9"/></g></svg>
+  <h1>Abrindo o seu <span>WhatsApp</span></h1>
+  <p id="msg">Um instante, estamos levando você para a conversa com a Constru Fácil.</p>
+  <div class="giro" id="giro"></div>
+  <div class="manual" id="manual"><a id="ir" href="#">Abrir a conversa</a></div>
+  <a class="voltar" href="./">Voltar ao site</a>
+</div>
+<script>
+(function(){
+  var q = new URLSearchParams(location.search);
+  var n = q.get('n') || '', c = q.get('c') || '', t = q.get('t') || '';
+  // O formulário manda os dados só pelo sessionStorage (dado pessoal fora da URL).
+  // Os botões mandam pelos dois: a query pode se perder no redirecionamento de URL limpa.
+  try {
+    var g = JSON.parse(sessionStorage.getItem('cf_wa') || '{}');
+    if (g.t && (c === 'formulario' || !t)) { t = g.t; n = n || g.n; c = c || g.c; }
+    sessionStorage.removeItem('cf_wa');
+  } catch (e) {}
+
+  var valido = /^[0-9]{10,15}$/.test(n);
+  var alvo = valido ? 'https://wa.me/' + n + (t ? '?text=' + encodeURIComponent(t) : '') : '';
+  var manual = document.getElementById('manual'), ir = document.getElementById('ir'),
+      giro = document.getElementById('giro'), msg = document.getElementById('msg');
+
+  // Evento de conversão. O redirecionamento espera o eventCallback (o GTM só chama
+  // depois que as tags do evento disparam) e no mínimo 0,9s de tela; o teto de 2,6s
+  // cobre GTM bloqueado, quando o callback nunca vem.
+  var partiu = false, tagOk = false, minimo = false;
+  function vai(){ if (partiu || !valido) return; partiu = true; location.replace(alvo); }
+  function tenta(){ if (tagOk && minimo) vai(); }
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({ event: 'whatsapp_click', contexto: c || 'desconhecido',
+    eventCallback: function(){ tagOk = true; tenta(); }, eventTimeout: 2000 });
+  // Sem container instalado ninguém chama o eventCallback: segue pelo teto.
+
+  if (valido) {
+    ir.href = alvo;
+    setTimeout(function(){ minimo = true; tenta(); }, 900);
+    setTimeout(vai, 2600);
+    setTimeout(function(){ giro.style.display = 'none'; manual.style.display = 'block'; }, 3200);
+  } else {
+    giro.style.display = 'none';
+    msg.innerHTML = 'Não conseguimos montar o link. Fale com a loja pelo WhatsApp ' +
+      '<a href="https://wa.me/5511982898159">(11) 98289-8159</a> ou pelo telefone <a href="tel:+551124291412">(11) 2429-1412</a>.';
+  }
+})();
+</script>
+</body>
+</html>
