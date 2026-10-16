@@ -83,6 +83,12 @@
       new IntersectionObserver(function (es) { visivel = es[0].isIntersecting; agenda(); }).observe(casa);
     }
     document.addEventListener('visibilitychange', agenda);
+    // textura de fundo do hero: baixa depois do load e só aparece quando já está pronta
+    addEventListener('load', function () {
+      var f = new Image();
+      f.onload = function () { document.documentElement.classList.add('fundo-ok'); };
+      f.src = 'assets/img/hero/fundo-' + (celular.matches ? '800' : '1280') + '.webp';
+    });
     // as outras fotos só baixam depois do load: nada disputa banda com a primeira
     addEventListener('load', function () { setTimeout(function () { hidrata(); agenda(); }, 1200); });
   }
